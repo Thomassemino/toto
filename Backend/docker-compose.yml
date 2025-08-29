@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/maestroobras
+      - JWT_SECRET=tu_jwt_secret_super_seguro_aqui
+      - SESSION_SECRET=tu_session_secret_aqui
+      - SESSION_CRYPTO_SECRET=tu_crypto_secret_aqui
+      - COOKIE_SECRET=tu_cookie_secret_aqui
+      - CORS_ORIGINS=http://localhost:3000
+      - PORT=4000
+      - UPLOAD_DIR=/app/uploads
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=maestroobras
+    restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express:1.0
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  uploads:

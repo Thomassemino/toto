@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(if exist \"C:\\Users\\Thomas\\Desktop\\toto\\Plantilla-Frontend\\src\\pages\\dashboard.astro\" echo \"File exists\" else echo \"File does not exist\")",
+      "Bash(if exist \"C:\\Users\\Thomas\\Desktop\\toto\\Plantilla-Frontend\\.env\" echo \"File exists\" else echo \"File does not exist\")",
+      "Bash(if exist \"C:\\Users\\Thomas\\Desktop\\toto\\Plantilla-Frontend\\src\\middleware\\index.ts\" echo \"File exists\" else echo \"File does not exist\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,67 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Acceso denegado - MaestroObras">
+  <div id="error-403-root"></div>
+</Layout>
+
+<script>
+  import { createRoot } from 'react-dom/client';
+  import { Shield, AlertCircle } from 'lucide-react';
+  
+  const Error403Page = () => {
+    return (
+      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="mb-8">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Shield size={32} className="text-red-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">
+              Acceso Denegado
+            </h1>
+            <p className="text-[var(--text-muted)] mb-8">
+              No tienes permisos suficientes para acceder a esta página.
+            </p>
+          </div>
+
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle size={20} className="text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div className="text-left">
+                <h3 className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                  Permisos requeridos
+                </h3>
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  Contacta con el administrador del sistema si necesitas acceso a esta funcionalidad.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <button
+              onClick={() => window.history.back()}
+              className="w-full btn-secondary"
+            >
+              Volver atrás
+            </button>
+            <button
+              onClick={() => window.location.href = '/dashboard'}
+              className="w-full btn-primary"
+            >
+              Ir al Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const container = document.getElementById('error-403-root');
+  if (container) {
+    const root = createRoot(container);
+    root.render(<Error403Page />);
+  }
+</script>

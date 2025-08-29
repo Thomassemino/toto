@@ -1,0 +1,33 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Dashboard - MaestroObras">
+  <div id="dashboard-root"></div>
+</Layout>
+
+<script>
+  import DashboardPage from '../../components/pages/DashboardPage';
+  import { createRoot } from 'react-dom/client';
+  import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+      },
+    },
+  });
+
+  const container = document.getElementById('dashboard-root');
+  if (container) {
+    const root = createRoot(container);
+    root.render(
+      <QueryClientProvider client={queryClient}>
+        <DashboardPage />
+      </QueryClientProvider>
+    );
+  }
+</script>

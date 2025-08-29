@@ -1,0 +1,339 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MaestroObras Backend API",
+    "version": "1.0.0",
+    "description": "API para gestión de obras, gastos, pagos, inventario, avance y reportes"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000/api",
+      "description": "Servidor de desarrollo"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "email": { "type": "string" },
+          "nombre": { "type": "string" },
+          "rol": { "type": "string", "enum": ["admin", "jefe_obra", "deposito", "lectura"] },
+          "obrasAsignadas": { "type": "array", "items": { "type": "string" } },
+          "activo": { "type": "boolean" }
+        }
+      },
+      "Obra": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "nombre": { "type": "string" },
+          "estado": { "type": "string", "enum": ["activa", "finalizada"] },
+          "moneda": { "type": "string" },
+          "cliente": {
+            "type": "object",
+            "properties": {
+              "nombre": { "type": "string" },
+              "contacto": { "type": "string" }
+            }
+          },
+          "presupuestoVigente": { "type": "string" },
+          "avancePct": { "type": "number" },
+          "etiquetas": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "Pago": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "obraId": { "type": "string" },
+          "monto": { "type": "string" },
+          "fechaRecepcion": { "type": "string", "format": "date-time" },
+          "metodo": { "type": "string" },
+          "observaciones": { "type": "string" }
+        }
+      },
+      "Gasto": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "obraId": { "type": "string" },
+          "tipo": { "type": "string", "enum": ["materiales", "mano_obra"] },
+          "descripcion": { "type": "string" },
+          "monto": { "type": "string" },
+          "fecha": { "type": "string", "format": "date-time" },
+          "etiquetas": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Autenticación"],
+        "summary": "Iniciar sesión",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" },
+                    "usuario": { "$ref": "#/components/schemas/Usuario" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/obras": {
+      "get": {
+        "tags": ["Obras"],
+        "summary": "Obtener obras",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["activa", "finalizada"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de obras",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "obras": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Obra" }
+                    },
+                    "totalPaginas": { "type": "integer" },
+                    "paginaActual": { "type": "integer" },
+                    "total": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Obras"],
+        "summary": "Crear obra",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": { "type": "string" },
+                  "cliente": {
+                    "type": "object",
+                    "properties": {
+                      "nombre": { "type": "string" },
+                      "contacto": { "type": "string" }
+                    }
+                  },
+                  "presupuestoInicial": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Obra creada exitosamente"
+          }
+        }
+      }
+    },
+    "/obras/{id}/pagos": {
+      "get": {
+        "tags": ["Pagos"],
+        "summary": "Obtener pagos de una obra",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de pagos"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Pagos"],
+        "summary": "Registrar pago",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "monto": { "type": "number" },
+                  "metodo": { "type": "string" },
+                  "observaciones": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pago registrado exitosamente"
+          }
+        }
+      }
+    },
+    "/obras/{id}/gastos": {
+      "get": {
+        "tags": ["Gastos"],
+        "summary": "Obtener gastos de una obra",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de gastos"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Gastos"],
+        "summary": "Registrar gasto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tipo": { "type": "string", "enum": ["materiales", "mano_obra"] },
+                  "descripcion": { "type": "string" },
+                  "monto": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Gasto registrado exitosamente"
+          }
+        }
+      }
+    },
+    "/reportes/obras/{id}/finanzas": {
+      "get": {
+        "tags": ["Reportes"],
+        "summary": "Obtener reporte financiero de obra",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reporte financiero"
+          }
+        }
+      }
+    },
+    "/export/obras/{id}/resumen.pdf": {
+      "get": {
+        "tags": ["Exportación"],
+        "summary": "Exportar resumen de obra en PDF",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF generado",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
